@@ -6,6 +6,7 @@
   <title>AI Resume Analyzer</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
 </head>
 
 <body class="bg-gray-50 text-gray-800">
@@ -20,45 +21,43 @@
 
 <!-- HERO -->
 <section class="text-center py-16">
-  <h2 class="text-4xl font-bold mb-4">Analyze Your Resume with AI</h2>
-  <p class="text-gray-600 mb-6">Upload resume + job description → Get smart insights instantly</p>
+  <h2 class="text-4xl font-bold mb-4">Upload Resume & Get AI Insights</h2>
+  <p class="text-gray-600">Upload your PDF resume and analyze it with AI</p>
 </section>
 
 <!-- MAIN -->
-<div class="max-w-5xl mx-auto p-4 grid md:grid-cols-2 gap-6">
+<div class="max-w-5xl mx-auto grid md:grid-cols-2 gap-6 p-4">
 
-  <!-- INPUT -->
+  <!-- INPUT CARD -->
   <div class="bg-white p-6 rounded shadow">
-    <h3 class="text-xl font-semibold mb-4">Upload Data</h3>
+    <h3 class="text-lg font-semibold mb-4">Upload Resume</h3>
 
-    <textarea id="resume" placeholder="Paste Resume Text..."
+    <input type="file" id="pdfFile" accept="application/pdf"
+      class="mb-4 w-full border p-2 rounded"/>
+
+    <textarea id="jobDesc" placeholder="Paste Job Description..."
       class="w-full p-3 border rounded mb-3 h-32"></textarea>
 
-    <textarea id="job" placeholder="Paste Job Description..."
-      class="w-full p-3 border rounded mb-3 h-32"></textarea>
-
-    <button onclick="analyze()"
+    <button onclick="handleUpload()"
       class="w-full bg-black text-white py-2 rounded hover:bg-gray-800">
       Analyze Resume
     </button>
   </div>
 
-  <!-- OUTPUT -->
+  <!-- OUTPUT CARD -->
   <div class="bg-white p-6 rounded shadow">
-    <h3 class="text-xl font-semibold mb-4">Result</h3>
-    <pre id="output" class="text-sm whitespace-pre-wrap text-gray-700">
+    <h3 class="text-lg font-semibold mb-4">Analysis Result</h3>
+    <pre id="output" class="text-sm whitespace-pre-wrap">
 Waiting for input...
     </pre>
   </div>
 
 </div>
 
-<!-- FOOTER -->
-<footer class="bg-white mt-12 p-6 text-center text-gray-500">
+<footer class="text-center text-gray-500 mt-10 pb-6">
   © 2026 AI Resume Analyzer
 </footer>
 
 <script src="script.js"></script>
-
 </body>
 </html>
