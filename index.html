@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Resume Analyzer</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-50 text-gray-800">
+
+<!-- HEADER -->
+<header class="bg-white shadow">
+  <div class="max-w-6xl mx-auto flex justify-between items-center p-4">
+    <h1 class="text-xl font-bold">AI Resume Analyzer</h1>
+    <button class="bg-black text-white px-4 py-2 rounded">Get Started</button>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="text-center py-16">
+  <h2 class="text-4xl font-bold mb-4">Analyze Your Resume with AI</h2>
+  <p class="text-gray-600 mb-6">Upload resume + job description → Get smart insights instantly</p>
+</section>
+
+<!-- MAIN -->
+<div class="max-w-5xl mx-auto p-4 grid md:grid-cols-2 gap-6">
+
+  <!-- INPUT -->
+  <div class="bg-white p-6 rounded shadow">
+    <h3 class="text-xl font-semibold mb-4">Upload Data</h3>
+
+    <textarea id="resume" placeholder="Paste Resume Text..."
+      class="w-full p-3 border rounded mb-3 h-32"></textarea>
+
+    <textarea id="job" placeholder="Paste Job Description..."
+      class="w-full p-3 border rounded mb-3 h-32"></textarea>
+
+    <button onclick="analyze()"
+      class="w-full bg-black text-white py-2 rounded hover:bg-gray-800">
+      Analyze Resume
+    </button>
+  </div>
+
+  <!-- OUTPUT -->
+  <div class="bg-white p-6 rounded shadow">
+    <h3 class="text-xl font-semibold mb-4">Result</h3>
+    <pre id="output" class="text-sm whitespace-pre-wrap text-gray-700">
+Waiting for input...
+    </pre>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="bg-white mt-12 p-6 text-center text-gray-500">
+  © 2026 AI Resume Analyzer
+</footer>
+
+<script src="script.js"></script>
+
+</body>
+</html>
