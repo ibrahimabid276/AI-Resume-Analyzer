@@ -3,60 +3,122 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
   <title>AI Resume Analyzer</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #0B0E14, #111827);
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Grid texture */
+    body::before {
+      content: "";
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      z-index: -1;
+    }
+
+    /* Glass cards */
+    .glass {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+    }
+
+    /* Glow button */
+    .glow-btn {
+      background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+      box-shadow: 0 0 20px rgba(139,92,246,0.6);
+      transition: 0.3s;
+    }
+
+    .glow-btn:hover {
+      transform: scale(1.03);
+      box-shadow: 0 0 30px rgba(139,92,246,0.9);
+    }
+
+    /* Upload box */
+    .upload-box {
+      border: 2px dashed rgba(139,92,246,0.5);
+      transition: 0.3s;
+    }
+
+    .upload-box:hover {
+      border-color: #8B5CF6;
+      box-shadow: 0 0 15px rgba(139,92,246,0.5);
+    }
+  </style>
 </head>
 
-<body class="bg-gray-50 text-gray-800">
-
-<!-- HEADER -->
-<header class="bg-white shadow">
-  <div class="max-w-6xl mx-auto flex justify-between items-center p-4">
-    <h1 class="text-xl font-bold">AI Resume Analyzer</h1>
-    <button class="bg-black text-white px-4 py-2 rounded">Get Started</button>
-  </div>
-</header>
+<body class="text-white">
 
 <!-- HERO -->
-<section class="text-center py-16">
-  <h2 class="text-4xl font-bold mb-4">Upload Resume & Get AI Insights</h2>
-  <p class="text-gray-600">Upload your PDF resume and analyze it with AI</p>
+<section class="text-center py-20 px-4">
+  <h1 class="text-4xl md:text-5xl font-bold mb-4">
+    See how your resume 
+    <span class="text-blue-400">matches</span> 
+    <span class="text-purple-400">the job</span>
+  </h1>
+
+  <p class="text-gray-400 max-w-xl mx-auto">
+    Upload your resume and compare it instantly with job descriptions using AI.
+  </p>
 </section>
 
-<!-- MAIN -->
-<div class="max-w-5xl mx-auto grid md:grid-cols-2 gap-6 p-4">
+<!-- MAIN SECTION -->
+<div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-8 px-4">
 
-  <!-- INPUT CARD -->
-  <div class="bg-white p-6 rounded shadow">
-    <h3 class="text-lg font-semibold mb-4">Upload Resume</h3>
+  <!-- LEFT: UPLOAD -->
+  <div class="glass p-6 text-center">
 
-    <input type="file" id="pdfFile" accept="application/pdf"
-      class="mb-4 w-full border p-2 rounded"/>
+    <div class="upload-box p-10 rounded-lg cursor-pointer">
+      <input type="file" id="pdfFile" accept="application/pdf" class="hidden"/>
+      
+      <label for="pdfFile" class="cursor-pointer">
+        <div class="text-purple-400 text-5xl mb-4">⬆️</div>
+        <p class="text-lg">Drop your resume here</p>
+        <p class="text-gray-400 text-sm mt-2">PDF only</p>
+      </label>
+    </div>
 
-    <textarea id="jobDesc" placeholder="Paste Job Description..."
-      class="w-full p-3 border rounded mb-3 h-32"></textarea>
+  </div>
+
+  <!-- RIGHT: JOB DESCRIPTION -->
+  <div class="glass p-6">
+    <h3 class="text-lg mb-3 text-gray-300">Job Description</h3>
+
+    <textarea id="jobDesc"
+      placeholder="Paste job description here..."
+      class="w-full h-48 bg-black/30 p-3 rounded border border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500">
+    </textarea>
 
     <button onclick="handleUpload()"
-      class="w-full bg-black text-white py-2 rounded hover:bg-gray-800">
+      class="glow-btn w-full mt-4 py-2 rounded-lg font-semibold">
       Analyze Resume
     </button>
   </div>
 
-  <!-- OUTPUT CARD -->
-  <div class="bg-white p-6 rounded shadow">
-    <h3 class="text-lg font-semibold mb-4">Analysis Result</h3>
-    <pre id="output" class="text-sm whitespace-pre-wrap">
+</div>
+
+<!-- RESULT -->
+<div class="max-w-4xl mx-auto mt-10 px-4">
+  <div class="glass p-6">
+    <h3 class="text-lg mb-3 text-gray-300">Analysis Result</h3>
+    <pre id="output" class="text-gray-200 whitespace-pre-wrap">
 Waiting for input...
     </pre>
   </div>
-
 </div>
-
-<footer class="text-center text-gray-500 mt-10 pb-6">
-  © 2026 AI Resume Analyzer
-</footer>
 
 <script src="script.js"></script>
 </body>
