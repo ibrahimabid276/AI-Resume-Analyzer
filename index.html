@@ -76,6 +76,7 @@ body::before {
 
     <!-- Upload -->
     <div class="glass p-6 glow text-center">
+      <h3 class="text-lg font-semibold mb-3 text-purple-400">📄 Resume PDF</h3>
       <input type="file" id="pdfFile" accept="application/pdf" class="hidden">
       <label for="pdfFile" class="cursor-pointer block">
         <div class="text-purple-400 text-5xl mb-3">⬆️</div>
@@ -86,9 +87,10 @@ body::before {
 
     <!-- Job -->
     <div class="glass p-6">
+      <h3 class="text-lg font-semibold mb-3 text-blue-400">💼 Job Description</h3>
       <textarea id="jobDesc"
-        placeholder="Paste here..."
-        class="w-full h-40 bg-black/30 p-3 rounded border border-gray-700"></textarea>
+        placeholder="Paste job description here..."
+        class="w-full h-40 bg-black/30 p-3 rounded border border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
     </div>
 
   </div>
@@ -107,6 +109,8 @@ body::before {
 <div id="results" class="hidden p-6">
 
   <div class="max-w-5xl mx-auto">
+
+    <h2 class="text-3xl font-bold text-center mb-6">📊 Analysis Results</h2>
 
     <!-- SCORE -->
     <div class="glass p-6 text-center mb-6">

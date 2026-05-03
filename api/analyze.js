@@ -14,22 +14,25 @@ export default async function handler(req, res) {
               parts: [
                 {
                   text: `
-Return ONLY JSON:
+You are an expert resume analyzer. Analyze this resume against the job description and return ONLY valid JSON (no markdown, no explanation):
 
 {
-  "score": 75,
-  "name": "John",
-  "title": "Developer",
-  "experience": "2 years",
-  "education": "BS CS",
-  "matched_skills": ["Python"],
-  "missing_skills": ["Docker"],
-  "strengths": ["Good logic"],
-  "tips": ["Improve resume"]
+  "score": <number 0-100>,
+  "name": "<candidate name or Unknown>",
+  "title": "<professional title>",
+  "experience": "<years of experience>",
+  "education": "<education details>",
+  "matched_skills": ["<skills from resume that match job>"],
+  "missing_skills": ["<skills required but missing>"],
+  "strengths": ["<strengths of this candidate>"],
+  "tips": ["<specific improvement tips>"]
 }
 
-Resume: ${resumeText}
-Job: ${jobDesc}
+RESUME TEXT:
+${resumeText}
+
+JOB DESCRIPTION:
+${jobDesc}
                   `,
                 },
               ],
