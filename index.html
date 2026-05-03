@@ -176,6 +176,31 @@ body::before {
 
   </div>
 
+  <!-- RAG Q&A SECTION -->
+  <div class="max-w-4xl mx-auto mt-8 glass p-6">
+    <h3 class="text-xl font-semibold mb-4 text-purple-400">💬 Ask Questions About Your Analysis</h3>
+    
+    <div class="flex gap-2 mb-4">
+      <input 
+        type="text" 
+        id="questionInput" 
+        placeholder="e.g., What skills should I improve?" 
+        class="flex-1 bg-black/30 p-3 rounded border border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+      />
+      <button 
+        onclick="askQuestion()" 
+        id="askBtn"
+        class="btn px-6 py-3 rounded-lg font-semibold whitespace-nowrap"
+      >
+        Ask AI
+      </button>
+    </div>
+
+    <div id="answerBox" class="bg-black/20 p-4 rounded border border-gray-700 min-h-[60px] text-gray-200 whitespace-pre-wrap">
+      <span class="text-gray-500">Your answer will appear here...</span>
+    </div>
+  </div>
+
 </div>
 
 <script src="script.js"></script>

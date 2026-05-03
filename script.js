@@ -1,3 +1,10 @@
+// Global variables to store analysis context
+let analysisContext = {
+  resumeText: '',
+  jobDesc: '',
+  result: null
+};
+
 // 📄 Extract text from PDF
 async function extractTextFromPDF(file) {
   const reader = new FileReader();
@@ -57,6 +64,10 @@ async function startAnalysis() {
       return;
     }
 
+    // Store context for Q&A
+    analysisContext.resumeText = resumeText;
+    analysisContext.jobDesc = jobDesc;
+
     btn.innerText = "Analyzing...";
 
     // 🌐 Send to backend
@@ -79,6 +90,9 @@ async function startAnalysis() {
       alert(data?.error || "No response from API");
       return;
     }
+
+    // Store result for Q&A
+    analysisContext.result = data;
 
     // 🎯 Show results
     showResults(data);
@@ -160,3 +174,70 @@ function fillList(id, items = []) {
     container.appendChild(li);
   });
 }
+
+// 💬 RAG Q&A Function
+async function askQuestion() {
+  const questionInput = document.getElementById('questionInput');
+  const answerBox = document.getElementById('answerBox');
+  const askBtn = document.getElementById('askBtn');
+  
+  const question = questionInput.value.trim();
+  
+  if (!question) {
+    alert('Please enter a question');
+    return;
+  }
+  
+  if (!analysisContext.resumeText) {
+    alert('Please analyze a resume first');
+    return;
+  }
+  
+  askBtn.disabled = true;
+  askBtn.innerText = 'Thinking...';
+  answerBox.innerHTML = '<span class="text-purple-400">Analyzing your question...</span>';
+  
+  try {
+    const res = await fetch('/api/ask', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        question,
+        resumeText: analysisContext.resumeText,
+        jobDesc: analysisContext.jobDesc,
+        analysisResult: analysisContext.result
+      })
+    });
+    
+    const data = await res.json();
+    
+    if (!res.ok || data.error) {
+      answerBox.innerHTML = `<span class="text-red-400">Error: ${data.error}</span>`;
+      return;
+    }
+    
+    answerBox.innerText = data.answer;
+    questionInput.value = '';
+    
+  } catch (err) {
+    console.error('Q&A Error:', err);
+    answerBox.innerHTML = '<span class="text-red-400">Failed to get answer. Please try again.</span>';
+  } finally {
+    askBtn.disabled = false;
+    askBtn.innerText = 'Ask AI';
+  }
+}
+
+// Allow Enter key to submit question
+document.addEventListener('DOMContentLoaded', () => {
+  const questionInput = document.getElementById('questionInput');
+  if (questionInput) {
+    questionInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        askQuestion();
+      }
+    });
+  }
+});
