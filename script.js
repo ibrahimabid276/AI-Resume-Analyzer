@@ -1,3 +1,6 @@
+// Configure PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
 // Global variables to store analysis context
 let analysisContext = {
   resumeText: '',
@@ -28,7 +31,8 @@ async function extractTextFromPDF(file) {
 
         resolve(text);
       } catch (err) {
-        reject("PDF reading failed");
+        console.error("PDF extraction error:", err);
+        reject(err);
       }
     };
 
@@ -78,34 +82,72 @@ async function startAnalysis() {
 
     btn.innerText = "Analyzing...";
 
-    console.log("Sending to API...");
+    console.log("Sending to Gemini API...");
 
-    // 🌐 Send to backend
-    const res = await fetch("/api/analyze", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        resumeText,
-        jobDesc,
-      }),
-    });
+    // 🌐 Send to Gemini API directly
+    const API_KEY = 'AIzaSyCjOyGoYZK2MrGgueZZ08XvTaiX62FgkBA';
+    
+    const prompt = `You are an expert resume analyzer. Analyze this resume against the job description and return ONLY valid JSON (no markdown, no code blocks, no explanation):
+
+{"score": 75, "name": "John Doe", "title": "Software Engineer", "experience": "3 years", "education": "BS Computer Science", "matched_skills": ["JavaScript", "React"], "missing_skills": ["TypeScript"], "strengths": ["Strong frontend skills"], "tips": ["Add more backend experience"]}
+
+RESUME TEXT:
+${resumeText}
+
+JOB DESCRIPTION:
+${jobDesc}`;
+
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{ text: prompt }]
+          }],
+          generationConfig: {
+            temperature: 0.3,
+            maxOutputTokens: 1000
+          }
+        })
+      }
+    );
 
     console.log("Response status:", res.status);
 
-    const data = await res.json();
+    const geminiData = await res.json();
 
-    console.log("API RESPONSE:", data); // 🧪 DEBUG
+    console.log("GEMINI RESPONSE:", geminiData);
 
     if (!res.ok) {
-      alert(`API Error: ${data.error || data.message || "Request failed"}`);
-      console.error("API Error Details:", data);
+      alert(`API Error: ${geminiData.error?.message || "Request failed"}`);
+      console.error("API Error Details:", geminiData);
       return;
     }
 
-    if (!data || data.error) {
-      alert(`Error: ${data.error || "No response from API"}`);
+    const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!text) {
+      alert("Empty response from AI");
+      console.error("No text in response:", geminiData);
+      return;
+    }
+
+    // Clean and parse JSON
+    let cleanedText = text.trim();
+    cleanedText = cleanedText.replace(/^```json\s*/i, '').replace(/\s*```$/i, '');
+    cleanedText = cleanedText.replace(/^```\s*/i, '').replace(/\s*```$/i, '');
+
+    console.log("Cleaned text:", cleanedText);
+
+    let data;
+    try {
+      data = JSON.parse(cleanedText);
+    } catch (parseError) {
+      console.error("JSON parse error:", parseError);
+      console.error("Text that failed to parse:", cleanedText);
+      alert("Failed to parse AI response. Check console for details.");
       return;
     }
 
@@ -216,27 +258,55 @@ async function askQuestion() {
   answerBox.innerHTML = '<span class="text-purple-400">Analyzing your question...</span>';
   
   try {
-    const res = await fetch('/api/ask', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        question,
-        resumeText: analysisContext.resumeText,
-        jobDesc: analysisContext.jobDesc,
-        analysisResult: analysisContext.result
-      })
-    });
+    const API_KEY = 'AIzaSyCjOyGoYZK2MrGgueZZ08XvTaiX62FgkBA';
+    
+    const prompt = `You are a resume analysis assistant. Based on the following resume and job description, answer this question concisely and helpfully.
+
+RESUME TEXT:
+${analysisContext.resumeText}
+
+JOB DESCRIPTION:
+${analysisContext.jobDesc}
+
+${analysisContext.result ? `ANALYSIS RESULT:
+${JSON.stringify(analysisContext.result, null, 2)}` : ''}
+
+QUESTION: ${question}
+
+ANSWER:`;
+    
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{ text: prompt }]
+          }],
+          generationConfig: {
+            temperature: 0.5,
+            maxOutputTokens: 500
+          }
+        })
+      }
+    );
     
     const data = await res.json();
     
     if (!res.ok || data.error) {
-      answerBox.innerHTML = `<span class="text-red-400">Error: ${data.error}</span>`;
+      answerBox.innerHTML = `<span class="text-red-400">Error: ${data.error?.message || 'Request failed'}</span>`;
       return;
     }
     
-    answerBox.innerText = data.answer;
+    const answer = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    
+    if (!answer) {
+      answerBox.innerHTML = '<span class="text-red-400">No answer received</span>';
+      return;
+    }
+    
+    answerBox.innerText = answer;
     questionInput.value = '';
     
   } catch (err) {
