@@ -1,34 +1,6 @@
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
-
   try {
     const { resumeText, jobDesc } = req.body;
-
-    const prompt = `
-You are an AI Resume Analyzer.
-
-Return ONLY JSON in this format:
-
-{
-  "score": number,
-  "name": "string",
-  "title": "string",
-  "experience": "string",
-  "education": "string",
-  "matched_skills": ["..."],
-  "missing_skills": ["..."],
-  "strengths": ["..."],
-  "tips": ["..."]
-}
-
-Resume:
-${resumeText}
-
-Job Description:
-${jobDesc}
-`;
 
     const response = await fetch(
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" +
@@ -37,23 +9,68 @@ ${jobDesc}
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
+          contents: [
+            {
+              parts: [
+                {
+                  text: `
+Return ONLY JSON:
+
+{
+  "score": 75,
+  "name": "John",
+  "title": "Developer",
+  "experience": "2 years",
+  "education": "BS CS",
+  "matched_skills": ["Python"],
+  "missing_skills": ["Docker"],
+  "strengths": ["Good logic"],
+  "tips": ["Improve resume"]
+}
+
+Resume: ${resumeText}
+Job: ${jobDesc}
+                  `,
+                },
+              ],
+            },
+          ],
         }),
       }
     );
 
     const data = await response.json();
-    const text =
-      data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
 
-    // Clean JSON
-    const cleaned = text.replace(/```json|```/g, "").trim();
+    console.log("RAW GEMINI:", data); // 👈 DEBUG
 
-    const result = JSON.parse(cleaned);
+    let text =
+      data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+      console.log("AI TEXT:", text); //
+
+    if (!text) {
+      return res.status(500).json({ error: "Empty AI response" });
+    }
+
+    // CLEAN TEXT
+    text = text.replace(/```json/g, "").replace(/```/g, "").trim();
+
+    let result;
+
+    try {
+      result = JSON.parse(text);
+    } catch (err) {
+      console.log("JSON ERROR:", text);
+
+      return res.status(500).json({
+        error: "Invalid JSON from AI",
+        raw: text,
+      });
+    }
 
     res.status(200).json(result);
 
   } catch (err) {
-    res.status(500).json({ error: "AI parsing failed" });
+    res.status(500).json({ error: err.message });
   }
 }
