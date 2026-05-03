@@ -40,6 +40,27 @@ async function extractTextFromPDF(file) {
   });
 }
 
+// 📄 Extract text from DOCX
+async function extractTextFromDOCX(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    
+    reader.onload = async function() {
+      try {
+        const arrayBuffer = this.result;
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        resolve(result.value);
+      } catch (err) {
+        console.error("DOCX extraction error:", err);
+        reject(err);
+      }
+    };
+    
+    reader.onerror = () => reject(new Error("Failed to read file"));
+    reader.readAsArrayBuffer(file);
+  });
+}
+
 
 // 🚀 Main function
 async function startAnalysis() {
@@ -53,7 +74,17 @@ async function startAnalysis() {
 
   // ❌ Validation
   if (!file) {
-    alert("Please upload a PDF resume file");
+    alert("Please upload a resume file (PDF or DOCX)");
+    return;
+  }
+
+  // Check file type
+  const fileName = file.name.toLowerCase();
+  const isPDF = fileName.endsWith('.pdf');
+  const isDOCX = fileName.endsWith('.docx');
+  
+  if (!isPDF && !isDOCX) {
+    alert("Please upload a PDF or DOCX file only");
     return;
   }
 
@@ -66,8 +97,13 @@ async function startAnalysis() {
     btn.innerText = "Reading your resume...";
     btn.disabled = true;
 
-    // 📄 Extract PDF text
-    const resumeText = await extractTextFromPDF(file);
+    // 📄 Extract text based on file type
+    let resumeText;
+    if (isPDF) {
+      resumeText = await extractTextFromPDF(file);
+    } else {
+      resumeText = await extractTextFromDOCX(file);
+    }
 
     console.log("RESUME TEXT:", resumeText); // 🧪 DEBUG
 

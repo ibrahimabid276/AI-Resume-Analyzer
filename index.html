@@ -7,6 +7,7 @@
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 
 <style>
 body {
@@ -76,12 +77,12 @@ body::before {
 
     <!-- Upload -->
     <div class="glass p-6 glow text-center">
-      <h3 class="text-lg font-semibold mb-3 text-purple-400">📄 Resume PDF</h3>
-      <input type="file" id="pdfFile" accept="application/pdf" class="hidden">
+      <h3 class="text-lg font-semibold mb-3 text-purple-400">📄 Resume (PDF/DOCX)</h3>
+      <input type="file" id="pdfFile" accept=".pdf,.docx" class="hidden">
       <label for="pdfFile" class="cursor-pointer block">
         <div class="text-purple-400 text-5xl mb-3">⬆️</div>
         <p id="fileName">Drop your resume here</p>
-        <p id="fileStatus" class="text-sm text-gray-400 mt-1">PDF only</p>
+        <p id="fileStatus" class="text-sm text-gray-400 mt-1">PDF or DOCX</p>
       </label>
     </div>
 
