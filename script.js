@@ -41,12 +41,20 @@ async function extractTextFromPDF(file) {
 async function startAnalysis() {
 
   const file = document.getElementById("pdfFile").files[0];
-  const jobDesc = document.getElementById("jobDesc").value;
+  const jobDesc = document.getElementById("jobDesc").value.trim();
   const btn = document.getElementById("analyzeBtn");
 
+  console.log("File:", file);
+  console.log("Job Description length:", jobDesc.length);
+
   // ❌ Validation
-  if (!file || !jobDesc) {
-    alert("Please upload a PDF and add job description");
+  if (!file) {
+    alert("Please upload a PDF resume file");
+    return;
+  }
+
+  if (!jobDesc || jobDesc.length < 10) {
+    alert("Please paste a job description (at least 10 characters)");
     return;
   }
 
@@ -70,6 +78,8 @@ async function startAnalysis() {
 
     btn.innerText = "Analyzing...";
 
+    console.log("Sending to API...");
+
     // 🌐 Send to backend
     const res = await fetch("/api/analyze", {
       method: "POST",
@@ -82,12 +92,20 @@ async function startAnalysis() {
       }),
     });
 
+    console.log("Response status:", res.status);
+
     const data = await res.json();
 
     console.log("API RESPONSE:", data); // 🧪 DEBUG
 
+    if (!res.ok) {
+      alert(`API Error: ${data.error || data.message || "Request failed"}`);
+      console.error("API Error Details:", data);
+      return;
+    }
+
     if (!data || data.error) {
-      alert(data?.error || "No response from API");
+      alert(`Error: ${data.error || "No response from API"}`);
       return;
     }
 
@@ -99,7 +117,7 @@ async function startAnalysis() {
 
   } catch (err) {
     console.error("ERROR:", err);
-    alert("Something went wrong");
+    alert(`Error: ${err.message || "Something went wrong"}. Check console for details.`);
   } finally {
     btn.innerText = "Analyze match";
     btn.disabled = false;
