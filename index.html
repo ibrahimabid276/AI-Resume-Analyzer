@@ -10,13 +10,15 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 
 <style>
+/* ===== BASE STYLES ===== */
 body {
   background: linear-gradient(135deg, #0B0E14, #111827);
   color: white;
   font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
 }
 
-/* Grid background */
+/* ===== ANIMATED BACKGROUND ===== */
 body::before {
   content: "";
   position: fixed;
@@ -27,44 +29,224 @@ body::before {
     linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
   background-size: 40px 40px;
   z-index: -1;
+  animation: gridMove 20s linear infinite;
 }
 
-/* Glass effect */
+@keyframes gridMove {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(40px, 40px); }
+}
+
+/* ===== GLASS EFFECT ===== */
 .glass {
   background: rgba(255,255,255,0.05);
   backdrop-filter: blur(12px);
   border-radius: 12px;
   border: 1px solid rgba(255,255,255,0.08);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
 }
 
-/* Glow */
+.glass::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+  transform: rotate(45deg);
+  transition: all 0.6s;
+  opacity: 0;
+}
+
+.glass:hover::before {
+  animation: shimmer 0.6s forwards;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateX(100%) translateY(100%) rotate(45deg); opacity: 0; }
+}
+
+.glass:hover {
+  transform: translateY(-5px) scale(1.02);
+  border-color: rgba(168, 85, 247, 0.3);
+  box-shadow: 0 10px 40px rgba(168, 85, 247, 0.2);
+}
+
+/* ===== GLOW EFFECTS ===== */
 .glow {
   box-shadow: 0 0 20px rgba(168,85,247,0.5);
+  animation: pulse 2s ease-in-out infinite;
 }
 
-/* Button */
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(168,85,247,0.5); }
+  50% { box-shadow: 0 0 40px rgba(168,85,247,0.8), 0 0 60px rgba(59,130,246,0.4); }
+}
+
+/* ===== BUTTON ANIMATIONS ===== */
 .btn {
   background: linear-gradient(90deg, #3B82F6, #A855F7);
-  transition: 0.3s;
-}
-.btn:hover {
-  transform: scale(1.03);
-  box-shadow: 0 0 25px rgba(168,85,247,0.8);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-/* Hide sections */
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  transition: left 0.5s;
+}
+
+.btn:hover::before {
+  left: 100%;
+}
+
+.btn:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 25px rgba(168,85,247,0.8), 0 10px 30px rgba(59,130,246,0.4);
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ===== ENTRANCE ANIMATIONS ===== */
+.fade-in-up {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.scale-in {
+  animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ===== SCORE CIRCLE ANIMATION ===== */
+#progressCircle {
+  transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6));
+}
+
+/* ===== SKILL TAG HOVER ===== */
+#matched span, #missing span {
+  transition: all 0.3s ease;
+  cursor: default;
+}
+
+#matched span:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(34, 197, 94, 0.6);
+}
+
+#missing span:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.6);
+}
+
+/* ===== LOADING SPINNER ===== */
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ===== HIDDEN UTILITY ===== */
 .hidden {
   display: none;
+}
+
+/* ===== RESULT CARDS STAGGER ===== */
+.result-card {
+  opacity: 0;
+  animation: slideIn 0.6s ease-out forwards;
+}
+
+.result-card:nth-child(1) { animation-delay: 0.1s; }
+.result-card:nth-child(2) { animation-delay: 0.2s; }
+.result-card:nth-child(3) { animation-delay: 0.3s; }
+.result-card:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .glass:hover {
+    transform: none;
+  }
+  
+  h1 {
+    font-size: 2rem !important;
+  }
 }
 </style>
 </head>
 
 <body>
 
+<!-- FLOATING PARTICLES BACKGROUND -->
+<div class="particles" id="particles"></div>
+
 <!-- LANDING STATE -->
 <div id="landing" class="p-6">
 
-  <section class="text-center py-16">
+  <section class="text-center py-16 fade-in-up">
     <h1 class="text-4xl font-bold mb-4">
       See how your resume
       <span class="text-blue-400">matches</span>
@@ -111,10 +293,10 @@ body::before {
 
   <div class="max-w-5xl mx-auto">
 
-    <h2 class="text-3xl font-bold text-center mb-6">📊 Analysis Results</h2>
+    <h2 class="text-3xl font-bold text-center mb-6 fade-in-up">📊 Analysis Results</h2>
 
     <!-- SCORE -->
-    <div class="glass p-6 text-center mb-6">
+    <div class="glass p-6 text-center mb-6 result-card">
       <h2 class="mb-4 text-xl">Match Score</h2>
 
       <div class="relative w-40 h-40 mx-auto">
@@ -138,7 +320,7 @@ body::before {
     </div>
 
     <!-- PROFILE -->
-    <div id="candidateInfo" class="glass p-6 mb-6">
+    <div id="candidateInfo" class="glass p-6 mb-6 result-card">
       <h3 class="mb-3 text-lg">Candidate Info</h3>
       <p>Name: N/A</p>
       <p>Title: N/A</p>
@@ -150,25 +332,25 @@ body::before {
     <div class="grid md:grid-cols-2 gap-6">
 
       <!-- Matched -->
-      <div class="glass p-4">
+      <div class="glass p-4 result-card">
         <h3 class="mb-2">Matched Skills</h3>
         <div id="matched" class="flex flex-wrap gap-2"></div>
       </div>
 
       <!-- Missing -->
-      <div class="glass p-4">
+      <div class="glass p-4 result-card">
         <h3 class="mb-2">Missing Skills</h3>
         <div id="missing" class="flex flex-wrap gap-2"></div>
       </div>
 
       <!-- Strengths -->
-      <div class="glass p-4">
+      <div class="glass p-4 result-card">
         <h3>Strengths</h3>
         <ul id="strengths" class="list-disc ml-4"></ul>
       </div>
 
       <!-- Tips -->
-      <div class="glass p-4">
+      <div class="glass p-4 result-card">
         <h3>Improvement Tips</h3>
         <ul id="tips" class="list-disc ml-4"></ul>
       </div>
@@ -178,7 +360,7 @@ body::before {
   </div>
 
   <!-- RAG Q&A SECTION -->
-  <div class="max-w-4xl mx-auto mt-8 glass p-6">
+  <div class="max-w-4xl mx-auto mt-8 glass p-6 result-card">
     <h3 class="text-xl font-semibold mb-4 text-purple-400">💬 Ask Questions About Your Analysis</h3>
     
     <div class="flex gap-2 mb-4">
@@ -214,10 +396,28 @@ document.getElementById('pdfFile').addEventListener('change', function(e) {
   
   if (file) {
     fileName.innerText = file.name;
-    fileName.classList.add('text-green-400');
+    fileName.classList.add('text-green-400', 'scale-in');
     fileStatus.innerText = '✓ File selected';
   }
 });
+
+// Create floating particles
+function createParticles() {
+  const container = document.getElementById('particles');
+  if (!container) return;
+  
+  for (let i = 0; i < 50; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    particle.style.left = Math.random() * 100 + '%';
+    particle.style.animationDelay = Math.random() * 15 + 's';
+    particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+    container.appendChild(particle);
+  }
+}
+
+// Initialize particles on page load
+document.addEventListener('DOMContentLoaded', createParticles);
 </script>
 
 </body>

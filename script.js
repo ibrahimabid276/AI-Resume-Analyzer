@@ -94,7 +94,7 @@ async function startAnalysis() {
   }
 
   try {
-    btn.innerText = "Reading your resume...";
+    btn.innerText = "⏳ Reading your resume...";
     btn.disabled = true;
 
     // 📄 Extract text based on file type
@@ -108,7 +108,7 @@ async function startAnalysis() {
     console.log("RESUME TEXT:", resumeText); // 🧪 DEBUG
 
     if (!resumeText || resumeText.length < 20) {
-      alert("PDF text extraction failed or empty");
+      alert("File text extraction failed or empty");
       return;
     }
 
@@ -116,7 +116,7 @@ async function startAnalysis() {
     analysisContext.resumeText = resumeText;
     analysisContext.jobDesc = jobDesc;
 
-    btn.innerText = "Analyzing...";
+    btn.innerText = "🤖 Analyzing with AI...";
 
     console.log("Sending to Gemini API...");
 
@@ -206,17 +206,21 @@ ${jobDesc}`;
 // 🎯 Show results in UI
 function showResults(data) {
 
-  // Switch UI
+  // Switch UI with animation
   document.getElementById("landing").classList.add("hidden");
-  document.getElementById("results").classList.remove("hidden");
+  const resultsSection = document.getElementById("results");
+  resultsSection.classList.remove("hidden");
+  resultsSection.classList.add("fade-in");
 
-  // 📊 Score
+  // 📊 Score with animated counter
   const score = data.score || 50;
-  document.getElementById("scoreText").innerText = score;
+  animateScore(score);
 
   const circle = document.getElementById("progressCircle");
   const offset = 440 - (440 * score) / 100;
-  circle.style.strokeDashoffset = offset;
+  setTimeout(() => {
+    circle.style.strokeDashoffset = offset;
+  }, 100);
 
   // 👤 Candidate Info
   document.getElementById("candidateInfo").innerHTML = `
@@ -237,6 +241,21 @@ function showResults(data) {
 
   // 💡 Tips
   fillList("tips", data.tips);
+}
+
+// 🎯 Animate score counter
+function animateScore(targetScore) {
+  const scoreElement = document.getElementById("scoreText");
+  let currentScore = 0;
+  const increment = targetScore / 50;
+  const timer = setInterval(() => {
+    currentScore += increment;
+    if (currentScore >= targetScore) {
+      currentScore = targetScore;
+      clearInterval(timer);
+    }
+    scoreElement.innerText = Math.round(currentScore);
+  }, 30);
 }
 
 
@@ -290,8 +309,8 @@ async function askQuestion() {
   }
   
   askBtn.disabled = true;
-  askBtn.innerText = 'Thinking...';
-  answerBox.innerHTML = '<span class="text-purple-400">Analyzing your question...</span>';
+  askBtn.innerText = '🤔 Thinking...';
+  answerBox.innerHTML = '<span class="text-purple-400 typing-effect">Analyzing your question</span>';
   
   try {
     const API_KEY = 'AIzaSyCjOyGoYZK2MrGgueZZ08XvTaiX62FgkBA';
@@ -342,7 +361,9 @@ ANSWER:`;
       return;
     }
     
-    answerBox.innerText = answer;
+    // Typewriter effect for answer
+    answerBox.innerHTML = '';
+    await typewriterEffect(answerBox, answer);
     questionInput.value = '';
     
   } catch (err) {
@@ -352,6 +373,27 @@ ANSWER:`;
     askBtn.disabled = false;
     askBtn.innerText = 'Ask AI';
   }
+}
+
+// ✨ Typewriter effect
+function typewriterEffect(element, text, speed = 20) {
+  return new Promise((resolve) => {
+    let i = 0;
+    element.classList.add('typing-effect');
+    
+    function type() {
+      if (i < text.length) {
+        element.innerHTML += text.charAt(i);
+        i++;
+        setTimeout(type, speed);
+      } else {
+        element.classList.remove('typing-effect');
+        resolve();
+      }
+    }
+    
+    type();
+  });
 }
 
 // Allow Enter key to submit question
