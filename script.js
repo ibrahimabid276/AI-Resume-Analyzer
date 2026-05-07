@@ -121,7 +121,7 @@ async function startAnalysis() {
     console.log("Sending to Gemini API...");
 
     // 🌐 Send to Gemini API directly
-    const API_KEY = 'AIzaSyCjOyGoYZK2MrGgueZZ08XvTaiX62FgkBA';
+    const API_KEY = 'AIzaSyBRQnQCJNVuAURCKdnDI0KfYZmZ5qhvKyQ';
     
     const prompt = `You are an expert resume analyzer. Analyze this resume against the job description and return ONLY valid JSON (no markdown, no code blocks, no explanation):
 
@@ -313,7 +313,7 @@ async function askQuestion() {
   answerBox.innerHTML = '<span class="text-purple-400 typing-effect">Analyzing your question</span>';
   
   try {
-    const API_KEY = 'AIzaSyCjOyGoYZK2MrGgueZZ08XvTaiX62FgkBA';
+    const API_KEY = 'AIzaSyBRQnQCJNVuAURCKdnDI0KfYZmZ5qhvKyQ';
     
     const prompt = `You are a resume analysis assistant. Based on the following resume and job description, answer this question concisely and helpfully.
 
