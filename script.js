@@ -144,7 +144,7 @@ ${jobDesc}`;
           }],
           generationConfig: {
             temperature: 0.3,
-            maxOutputTokens: 1000
+            maxOutputTokens: 2000
           }
         })
       }
@@ -183,7 +183,21 @@ ${jobDesc}`;
     } catch (parseError) {
       console.error("JSON parse error:", parseError);
       console.error("Text that failed to parse:", cleanedText);
-      alert("Failed to parse AI response. Check console for details.");
+      console.warn("JSON parse error, attempting to fix...");
+      try {
+        const lastBrace = cleanedText.lastIndexOf("}");
+        if (lastBrace > 0) {
+          cleanedText = cleanedText.substring(0, lastBrace + 1);
+          data = JSON.parse(cleanedText);
+          console.log("Successfully fixed and parsed JSON");
+        } else {
+          throw new Error("No complete JSON");
+        }
+      } catch (fixError) {
+        console.error("Failed to fix JSON:", fixError);
+        alert("AI response was incomplete. Please try again.");
+        return;
+      }
       return;
     }
 
