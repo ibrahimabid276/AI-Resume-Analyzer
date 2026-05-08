@@ -1,5 +1,7 @@
 ﻿// Configure PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+if (typeof pdfjsLib !== 'undefined') {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+}
 
 // Global variables to store analysis context
 let analysisContext = {
@@ -8,57 +10,73 @@ let analysisContext = {
   result: null
 };
 
-// 📄 Extract text from PDF
+//  Extract text from PDF
 async function extractTextFromPDF(file) {
-  const reader = new FileReader();
-
-  return new Promise((resolve, reject) => {
-    reader.onload = async function () {
-      try {
-        const typedarray = new Uint8Array(this.result);
-        const pdf = await pdfjsLib.getDocument(typedarray).promise;
-
-        let text = "";
-
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const content = await page.getTextContent();
-
-          content.items.forEach((item) => {
-            text += item.str + " ";
-          });
-        }
-
-        resolve(text);
-      } catch (err) {
-        console.error("PDF extraction error:", err);
-        reject(err);
-      }
-    };
-
-    reader.readAsArrayBuffer(file);
-  });
-}
-
-// 📄 Extract text from DOCX
-async function extractTextFromDOCX(file) {
-  return new Promise((resolve, reject) => {
+  try {
+    console.log("Starting PDF extraction...");
+    console.log("File name:", file.name);
+    console.log("File size:", file.size, "bytes");
+    
     const reader = new FileReader();
     
-    reader.onload = async function() {
-      try {
-        const arrayBuffer = this.result;
-        const result = await mammoth.extractRawText({ arrayBuffer });
-        resolve(result.value);
-      } catch (err) {
-        console.error("DOCX extraction error:", err);
-        reject(err);
-      }
-    };
+    const arrayBuffer = await new Promise((resolve, reject) => {
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error("Failed to read file"));
+      reader.readAsArrayBuffer(file);
+    });
+
+    console.log("File loaded, initializing PDF.js...");
+    const typedarray = new Uint8Array(arrayBuffer);
+    const pdf = await pdfjsLib.getDocument(typedarray).promise;
     
-    reader.onerror = () => reject(new Error("Failed to read file"));
-    reader.readAsArrayBuffer(file);
-  });
+    console.log("PDF loaded, pages:", pdf.numPages);
+
+    let text = "";
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+      console.log(`Extracting page ${i}...`);
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+
+      content.items.forEach((item) => {
+        if (item.str) {
+          text += item.str + " ";
+        }
+      });
+    }
+
+    console.log("PDF extraction complete, text length:", text.length);
+    return text;
+  } catch (err) {
+    console.error("PDF extraction error:", err);
+    throw new Error(`PDF extraction failed: ${err.message}`);
+  }
+}
+
+//  Extract text from DOCX
+async function extractTextFromDOCX(file) {
+  try {
+    console.log("Starting DOCX extraction...");
+    console.log("File name:", file.name);
+    console.log("File size:", file.size, "bytes");
+    
+    const reader = new FileReader();
+    
+    const arrayBuffer = await new Promise((resolve, reject) => {
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error("Failed to read file"));
+      reader.readAsArrayBuffer(file);
+    });
+
+    console.log("File loaded, extracting with Mammoth.js...");
+    const result = await mammoth.extractRawText({ arrayBuffer });
+    
+    console.log("DOCX extraction complete, text length:", result.value.length);
+    return result.value;
+  } catch (err) {
+    console.error("DOCX extraction error:", err);
+    throw new Error(`DOCX extraction failed: ${err.message}`);
+  }
 }
 
 
@@ -99,16 +117,22 @@ async function startAnalysis() {
 
     // 📄 Extract text based on file type
     let resumeText;
-    if (isPDF) {
-      resumeText = await extractTextFromPDF(file);
-    } else {
-      resumeText = await extractTextFromDOCX(file);
+    try {
+      if (isPDF) {
+        resumeText = await extractTextFromPDF(file);
+      } else {
+        resumeText = await extractTextFromDOCX(file);
+      }
+    } catch (extractError) {
+      console.error("Extraction failed:", extractError);
+      alert(`Failed to extract text from file.\n\nError: ${extractError.message}\n\nPlease try:\n• Using a different PDF or Word file\n• Converting your file to PDF\n• Checking if the file is corrupted or password-protected\n\nCheck the browser console (F12) for more details.`);
+      return;
     }
 
     console.log("RESUME TEXT:", resumeText); // 🧪 DEBUG
 
-    if (!resumeText || resumeText.length < 20) {
-      alert(`File text extraction failed or empty.\n\nSupported formats: PDF and Word (.docx)\n\nPlease try:\n• Using a different PDF or Word file\n• Converting your file to PDF\n• Checking if the file is corrupted or password-protected`);
+    if (!resumeText || resumeText.trim().length < 20) {
+      alert(`File text extraction failed or empty.\n\nSupported formats: PDF and Word (.docx)\n\nPlease try:\n• Using a different PDF or Word file\n• Converting your file to PDF\n• Checking if the file is corrupted or password-protected\n\nCheck the browser console (F12) for more details.`);
       return;
     }
 
