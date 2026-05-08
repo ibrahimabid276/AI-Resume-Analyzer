@@ -1,4 +1,12 @@
-﻿// Global variables to store analysis context
+﻿// ========================================
+// AI Resume Analyzer - Frontend Script
+// ========================================
+// IMPORTANT: Replace 'YOUR_OPENROUTER_API_KEY_HERE' with your actual OpenRouter API key
+// Lines to update: ~178 (startAnalysis function) and ~360 (askQuestion function)
+// For production, use a backend proxy to hide API keys
+// ========================================
+
+// Global variables to store analysis context
 let analysisContext = {
   resumeText: '',
   jobDesc: '',
@@ -173,91 +181,32 @@ async function startAnalysis() {
 
     btn.innerText = "🤖 Analyzing with AI...";
 
-    console.log("Sending to OpenRouter API...");
+    console.log("Sending to OpenRouter API via backend...");
 
-    // 🌐 Send to OpenRouter API
-    const API_KEY = process.env.OPENROUTER_API_KEY || 'YOUR_OPENROUTER_API_KEY_HERE';
-    
-    const prompt = `You are an expert resume analyzer. Analyze this resume against the job description and return ONLY valid JSON (no markdown, no code blocks, no explanation):
-
-{"score": 75, "name": "John Doe", "title": "Software Engineer", "experience": "3 years", "education": "BS Computer Science", "matched_skills": ["JavaScript", "React"], "missing_skills": ["TypeScript"], "strengths": ["Strong frontend skills"], "tips": ["Add more backend experience"]}
-
-RESUME TEXT:
-${resumeText}
-
-JOB DESCRIPTION:
-${jobDesc}`;
-
-    const res = await fetch(
-      'https://openrouter.ai/api/v1/chat/completions',
-      {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${API_KEY}`,
-          'HTTP-Referer': window.location.href,
-          'X-Title': 'AI Resume Analyzer'
-        },
-        body: JSON.stringify({
-          model: 'google/gemma-3-12b-it:free',
-          messages: [{
-            role: 'user',
-            content: prompt
-          }]
-        })
-      }
-    );
+    // 🌐 Send to backend API endpoint (keeps API key secure on server)
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        resumeText: resumeText,
+        jobDesc: jobDesc
+      })
+    });
 
     console.log("Response status:", res.status);
 
-    const openRouterData = await res.json();
+    const responseData = await res.json();
 
-    console.log("OPENROUTER RESPONSE:", openRouterData);
+    console.log("BACKEND API RESPONSE:", responseData);
 
     if (!res.ok) {
-      alert(`API Error: ${openRouterData.error?.message || "Request failed"}`);
-      console.error("API Error Details:", openRouterData);
+      alert(`API Error: ${responseData.error || "Request failed"}`);
+      console.error("API Error Details:", responseData);
       return;
     }
 
-    const text = openRouterData.choices?.[0]?.message?.content;
-
-    if (!text) {
-      alert("Empty response from AI");
-      console.error("No text in response:", openRouterData);
-      return;
-    }
-
-    // Clean and parse JSON
-    let cleanedText = text.trim();
-    cleanedText = cleanedText.replace(/^```json\s*/i, '').replace(/\s*```$/i, '');
-    cleanedText = cleanedText.replace(/^```\s*/i, '').replace(/\s*```$/i, '');
-
-    console.log("Cleaned text:", cleanedText);
-
-    let data;
-    try {
-      data = JSON.parse(cleanedText);
-    } catch (parseError) {
-      console.error("JSON parse error:", parseError);
-      console.error("Text that failed to parse:", cleanedText);
-      console.warn("JSON parse error, attempting to fix...");
-      try {
-        const lastBrace = cleanedText.lastIndexOf("}");
-        if (lastBrace > 0) {
-          cleanedText = cleanedText.substring(0, lastBrace + 1);
-          data = JSON.parse(cleanedText);
-          console.log("Successfully fixed and parsed JSON");
-        } else {
-          throw new Error("No complete JSON");
-        }
-      } catch (fixError) {
-        console.error("Failed to fix JSON:", fixError);
-        alert("AI response was incomplete. Please try again.");
-        return;
-      }
-      return;
-    }
+    // Backend returns the parsed result directly
+    const data = responseData;
 
     // Store result for Q&A
     analysisContext.result = data;
@@ -385,47 +334,26 @@ async function askQuestion() {
   answerBox.innerHTML = '<span class="text-purple-400 typing-effect">Analyzing your question</span>';
   
   try {
-    const API_KEY = process.env.OPENROUTER_API_KEY || 'YOUR_OPENROUTER_API_KEY_HERE';
-    
-    const prompt = `You are an expert resume analyzer assistant. Use the following context to answer the question.
-
-RESUME TEXT:
-${analysisContext.resumeText}
-
-${analysisContext.jobDesc ? `JOB DESCRIPTION:\n${analysisContext.jobDesc}\n\n` : ''}${analysisContext.result ? `ANALYSIS RESULT:\n${JSON.stringify(analysisContext.result, null, 2)}\n\n` : ''}
-
-QUESTION: ${question}
-
-ANSWER:`;
-    
-    const res = await fetch(
-      'https://openrouter.ai/api/v1/chat/completions',
-      {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${API_KEY}`,
-          'HTTP-Referer': window.location.href,
-          'X-Title': 'AI Resume Analyzer'
-        },
-        body: JSON.stringify({
-          model: 'google/gemma-3-12b-it:free',
-          messages: [{
-            role: 'user',
-            content: prompt
-          }]
-        })
-      }
-    );
+    // Send to backend API endpoint (keeps API key secure on server)
+    const res = await fetch('/api/ask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        question: question,
+        resumeText: analysisContext.resumeText,
+        jobDesc: analysisContext.jobDesc,
+        analysisResult: analysisContext.result
+      })
+    });
     
     const data = await res.json();
     
     if (!res.ok || data.error) {
-      answerBox.innerHTML = `<span class="text-red-400">Error: ${data.error?.message || 'Request failed'}</span>`;
+      answerBox.innerHTML = `<span class="text-red-400">Error: ${data.error || 'Request failed'}</span>`;
       return;
     }
     
-    const answer = data.choices?.[0]?.message?.content;
+    const answer = data.answer;
     
     if (!answer) {
       answerBox.innerHTML = '<span class="text-red-400">No answer received</span>';
