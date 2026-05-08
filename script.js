@@ -1,4 +1,4 @@
-// Configure PDF.js worker
+﻿// Configure PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
 // Global variables to store analysis context
@@ -108,7 +108,7 @@ async function startAnalysis() {
     console.log("RESUME TEXT:", resumeText); // 🧪 DEBUG
 
     if (!resumeText || resumeText.length < 20) {
-      alert("File text extraction failed or empty");
+      alert(`File text extraction failed or empty.\n\nSupported formats: PDF and Word (.docx)\n\nPlease try:\n• Using a different PDF or Word file\n• Converting your file to PDF\n• Checking if the file is corrupted or password-protected`);
       return;
     }
 
@@ -329,16 +329,12 @@ async function askQuestion() {
   try {
     const API_KEY = 'YOUR_API_KEY_HERE';
     
-    const prompt = `You are a resume analysis assistant. Based on the following resume and job description, answer this question concisely and helpfully.
+    const prompt = `You are an expert resume analyzer assistant. Use the following context to answer the question.
 
 RESUME TEXT:
 ${analysisContext.resumeText}
 
-JOB DESCRIPTION:
-${analysisContext.jobDesc}
-
-${analysisContext.result ? `ANALYSIS RESULT:
-${JSON.stringify(analysisContext.result, null, 2)}` : ''}
+${analysisContext.jobDesc ? `JOB DESCRIPTION:\n${analysisContext.jobDesc}\n\n` : ''}${analysisContext.result ? `ANALYSIS RESULT:\n${JSON.stringify(analysisContext.result, null, 2)}\n\n` : ''}
 
 QUESTION: ${question}
 
@@ -390,18 +386,17 @@ ANSWER:`;
 }
 
 // ✨ Typewriter effect
-function typewriterEffect(element, text, speed = 20) {
+async function typewriterEffect(element, text) {
+  const speed = 20; // milliseconds per character
+  let i = 0;
+  
   return new Promise((resolve) => {
-    let i = 0;
-    element.classList.add('typing-effect');
-    
     function type() {
       if (i < text.length) {
         element.innerHTML += text.charAt(i);
         i++;
         setTimeout(type, speed);
       } else {
-        element.classList.remove('typing-effect');
         resolve();
       }
     }
@@ -409,6 +404,7 @@ function typewriterEffect(element, text, speed = 20) {
     type();
   });
 }
+
 
 // Allow Enter key to submit question
 document.addEventListener('DOMContentLoaded', () => {
