@@ -38,7 +38,7 @@ JOB DESCRIPTION:
 ${jobDesc}`;
 
     console.log('Sending request to OpenRouter API...');
-    console.log('Using model: meta-llama/llama-3-8b-instruct:free');
+    console.log('Using model: mistralai/mistral-7b-instruct:free');
 
     let response;
     try {
@@ -53,7 +53,7 @@ ${jobDesc}`;
             'X-Title': 'AI Resume Analyzer'
           },
           body: JSON.stringify({
-            model: 'meta-llama/llama-3-8b-instruct:free',
+            model: 'mistralai/mistral-7b-instruct:free',
             messages: [{
               role: 'user',
               content: prompt
