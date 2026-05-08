@@ -195,6 +195,15 @@ async function startAnalysis() {
 
     console.log("Response status:", res.status);
 
+    // Check if response is JSON before parsing
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      const textResponse = await res.text();
+      console.error('❌ Non-JSON response received:', textResponse.substring(0, 200));
+      alert(`API Error: Server returned HTML instead of JSON. The API endpoint may not be configured correctly.`);
+      return;
+    }
+
     const responseData = await res.json();
 
     console.log("BACKEND API RESPONSE:", responseData);
@@ -345,6 +354,15 @@ async function askQuestion() {
         analysisResult: analysisContext.result
       })
     });
+    
+    // Check if response is JSON before parsing
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      const textResponse = await res.text();
+      console.error('❌ Non-JSON response received:', textResponse.substring(0, 200));
+      answerBox.innerHTML = '<span class="text-red-400">API Error: Server returned HTML instead of JSON</span>';
+      return;
+    }
     
     const data = await res.json();
     
