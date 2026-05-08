@@ -1,0 +1,6 @@
+{
+  "name": "ai-resume-analyzer",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "AI-powered resume analyzer using OpenRouter API"
+}
