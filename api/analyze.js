@@ -19,8 +19,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing resumeText or jobDesc' });
     }
 
-    if (!process.env.GEMINI_API_KEY) {
-      console.error('GEMINI_API_KEY not set');
+    if (!process.env.OPENROUTER_API_KEY) {
+      console.error('OPENROUTER_API_KEY not set');
       return res.status(500).json({ error: 'API key not configured' });
     }
 
@@ -34,38 +34,39 @@ ${resumeText}
 JOB DESCRIPTION:
 ${jobDesc}`;
 
-    console.log('Sending request to Gemini API...');
+    console.log('Sending request to OpenRouter API...');
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      'https://openrouter.ai/api/v1/chat/completions',
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`
+        },
         body: JSON.stringify({
-          contents: [{
-            parts: [{ text: prompt }]
-          }],
-          generationConfig: {
-            temperature: 0.3,
-            maxOutputTokens: 1000
-          }
+          model: 'google/gemma-3-12b-it:free',
+          messages: [{
+            role: 'user',
+            content: prompt
+          }]
         })
       }
     );
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('Gemini API error:', errorData);
+      console.error('OpenRouter API error:', errorData);
       return res.status(response.status).json({ 
-        error: 'Gemini API error', 
+        error: 'OpenRouter API error', 
         details: errorData 
       });
     }
 
     const data = await response.json();
-    console.log('Gemini response:', JSON.stringify(data, null, 2));
+    console.log('OpenRouter response:', JSON.stringify(data, null, 2));
 
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const text = data.choices?.[0]?.message?.content;
 
     if (!text) {
       console.error('No text in response:', data);

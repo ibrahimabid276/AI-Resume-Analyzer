@@ -142,10 +142,10 @@ async function startAnalysis() {
 
     btn.innerText = "🤖 Analyzing with AI...";
 
-    console.log("Sending to Gemini API...");
+    console.log("Sending to OpenRouter API...");
 
-    // 🌐 Send to Gemini API directly
-    const API_KEY = 'YOUR_API_KEY_HERE';
+    // 🌐 Send to OpenRouter API
+    const API_KEY = process.env.OPENROUTER_API_KEY || 'YOUR_OPENROUTER_API_KEY_HERE';
     
     const prompt = `You are an expert resume analyzer. Analyze this resume against the job description and return ONLY valid JSON (no markdown, no code blocks, no explanation):
 
@@ -158,39 +158,42 @@ JOB DESCRIPTION:
 ${jobDesc}`;
 
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`,
+      'https://openrouter.ai/api/v1/chat/completions',
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${API_KEY}`,
+          'HTTP-Referer': window.location.href,
+          'X-Title': 'AI Resume Analyzer'
+        },
         body: JSON.stringify({
-          contents: [{
-            parts: [{ text: prompt }]
-          }],
-          generationConfig: {
-            temperature: 0.3,
-            maxOutputTokens: 2000
-          }
+          model: 'google/gemma-3-12b-it:free',
+          messages: [{
+            role: 'user',
+            content: prompt
+          }]
         })
       }
     );
 
     console.log("Response status:", res.status);
 
-    const geminiData = await res.json();
+    const openRouterData = await res.json();
 
-    console.log("GEMINI RESPONSE:", geminiData);
+    console.log("OPENROUTER RESPONSE:", openRouterData);
 
     if (!res.ok) {
-      alert(`API Error: ${geminiData.error?.message || "Request failed"}`);
-      console.error("API Error Details:", geminiData);
+      alert(`API Error: ${openRouterData.error?.message || "Request failed"}`);
+      console.error("API Error Details:", openRouterData);
       return;
     }
 
-    const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
+    const text = openRouterData.choices?.[0]?.message?.content;
 
     if (!text) {
       alert("Empty response from AI");
-      console.error("No text in response:", geminiData);
+      console.error("No text in response:", openRouterData);
       return;
     }
 
@@ -351,7 +354,7 @@ async function askQuestion() {
   answerBox.innerHTML = '<span class="text-purple-400 typing-effect">Analyzing your question</span>';
   
   try {
-    const API_KEY = 'YOUR_API_KEY_HERE';
+    const API_KEY = process.env.OPENROUTER_API_KEY || 'YOUR_OPENROUTER_API_KEY_HERE';
     
     const prompt = `You are an expert resume analyzer assistant. Use the following context to answer the question.
 
@@ -365,18 +368,21 @@ QUESTION: ${question}
 ANSWER:`;
     
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`,
+      'https://openrouter.ai/api/v1/chat/completions',
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${API_KEY}`,
+          'HTTP-Referer': window.location.href,
+          'X-Title': 'AI Resume Analyzer'
+        },
         body: JSON.stringify({
-          contents: [{
-            parts: [{ text: prompt }]
-          }],
-          generationConfig: {
-            temperature: 0.5,
-            maxOutputTokens: 500
-          }
+          model: 'google/gemma-3-12b-it:free',
+          messages: [{
+            role: 'user',
+            content: prompt
+          }]
         })
       }
     );
@@ -388,7 +394,7 @@ ANSWER:`;
       return;
     }
     
-    const answer = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const answer = data.choices?.[0]?.message?.content;
     
     if (!answer) {
       answerBox.innerHTML = '<span class="text-red-400">No answer received</span>';
