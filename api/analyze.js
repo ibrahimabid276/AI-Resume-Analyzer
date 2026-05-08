@@ -38,30 +38,43 @@ JOB DESCRIPTION:
 ${jobDesc}`;
 
     console.log('Sending request to OpenRouter API...');
+    console.log('Using model: google/gemma-3-12b-it:free');
 
-    const response = await fetch(
-      'https://openrouter.ai/api/v1/chat/completions',
-      {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: 'google/gemma-3-12b-it:free',
-          messages: [{
-            role: 'user',
-            content: prompt
-          }]
-        })
-      }
-    );
+    let response;
+    try {
+      response = await fetch(
+        'https://openrouter.ai/api/v1/chat/completions',
+        {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+            'HTTP-Referer': 'https://ai-resume-analyzer.vercel.app',
+            'X-Title': 'AI Resume Analyzer'
+          },
+          body: JSON.stringify({
+            model: 'google/gemma-3-12b-it:free',
+            messages: [{
+              role: 'user',
+              content: prompt
+            }]
+          })
+        }
+      );
+    } catch (fetchError) {
+      console.error('❌ Network error calling OpenRouter:', fetchError);
+      return res.status(500).json({ 
+        error: `Network error: ${fetchError.message}`,
+        details: 'Failed to connect to OpenRouter API'
+      });
+    }
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('OpenRouter API error:', errorData);
+      console.error('❌ OpenRouter API error:', errorData);
+      console.error('Response status:', response.status);
       return res.status(response.status).json({ 
-        error: 'OpenRouter API error', 
+        error: `OpenRouter API error: ${errorData.error?.message || errorData.error || 'Unknown error'}`, 
         details: errorData 
       });
     }
