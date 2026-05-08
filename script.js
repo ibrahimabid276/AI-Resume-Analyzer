@@ -1,6 +1,9 @@
-﻿// Configure PDF.js worker
+﻿// Configure PDF.js worker - ensure it's set before any PDF operations
 if (typeof pdfjsLib !== 'undefined') {
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+  console.log("PDF.js worker configured");
+} else {
+  console.error("PDF.js library not loaded!");
 }
 
 // Global variables to store analysis context
@@ -16,6 +19,11 @@ async function extractTextFromPDF(file) {
     console.log("Starting PDF extraction...");
     console.log("File name:", file.name);
     console.log("File size:", file.size, "bytes");
+    console.log("PDF.js available:", typeof pdfjsLib !== 'undefined');
+    
+    if (typeof pdfjsLib === 'undefined') {
+      throw new Error("PDF.js library failed to load. Please check your internet connection and refresh the page.");
+    }
     
     const reader = new FileReader();
     
@@ -27,7 +35,14 @@ async function extractTextFromPDF(file) {
 
     console.log("File loaded, initializing PDF.js...");
     const typedarray = new Uint8Array(arrayBuffer);
-    const pdf = await pdfjsLib.getDocument(typedarray).promise;
+    
+    let pdf;
+    try {
+      pdf = await pdfjsLib.getDocument(typedarray).promise;
+    } catch (pdfError) {
+      console.error("PDF.js document loading error:", pdfError);
+      throw new Error(`Failed to parse PDF file: ${pdfError.message}`);
+    }
     
     console.log("PDF loaded, pages:", pdf.numPages);
 
@@ -59,6 +74,11 @@ async function extractTextFromDOCX(file) {
     console.log("Starting DOCX extraction...");
     console.log("File name:", file.name);
     console.log("File size:", file.size, "bytes");
+    console.log("Mammoth.js available:", typeof mammoth !== 'undefined');
+    
+    if (typeof mammoth === 'undefined') {
+      throw new Error("Mammoth.js library failed to load. Please check your internet connection and refresh the page.");
+    }
     
     const reader = new FileReader();
     
@@ -69,7 +89,13 @@ async function extractTextFromDOCX(file) {
     });
 
     console.log("File loaded, extracting with Mammoth.js...");
-    const result = await mammoth.extractRawText({ arrayBuffer });
+    let result;
+    try {
+      result = await mammoth.extractRawText({ arrayBuffer });
+    } catch (mammothError) {
+      console.error("Mammoth.js extraction error:", mammothError);
+      throw new Error(`Failed to extract text from Word document: ${mammothError.message}`);
+    }
     
     console.log("DOCX extraction complete, text length:", result.value.length);
     return result.value;
