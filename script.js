@@ -1,12 +1,4 @@
-﻿// Configure PDF.js worker - ensure it's set before any PDF operations
-if (typeof pdfjsLib !== 'undefined') {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
-  console.log("PDF.js worker configured");
-} else {
-  console.error("PDF.js library not loaded!");
-}
-
-// Global variables to store analysis context
+﻿// Global variables to store analysis context
 let analysisContext = {
   resumeText: '',
   jobDesc: '',
@@ -22,7 +14,7 @@ async function extractTextFromPDF(file) {
     console.log("PDF.js available:", typeof pdfjsLib !== 'undefined');
     
     if (typeof pdfjsLib === 'undefined') {
-      throw new Error("PDF.js library failed to load. Please check your internet connection and refresh the page.");
+      throw new Error("PDF.js library is not loaded. Please refresh the page and try again.");
     }
     
     const reader = new FileReader();
@@ -38,10 +30,12 @@ async function extractTextFromPDF(file) {
     
     let pdf;
     try {
-      pdf = await pdfjsLib.getDocument(typedarray).promise;
+      const loadingTask = pdfjsLib.getDocument({data: typedarray});
+      pdf = await loadingTask.promise;
+      console.log("✅ PDF document loaded successfully");
     } catch (pdfError) {
-      console.error("PDF.js document loading error:", pdfError);
-      throw new Error(`Failed to parse PDF file: ${pdfError.message}`);
+      console.error("❌ PDF.js document loading error:", pdfError);
+      throw new Error(`Failed to parse PDF file. The file might be corrupted or password-protected. Details: ${pdfError.message}`);
     }
     
     console.log("PDF loaded, pages:", pdf.numPages);
@@ -60,10 +54,15 @@ async function extractTextFromPDF(file) {
       });
     }
 
-    console.log("PDF extraction complete, text length:", text.length);
+    console.log("✅ PDF extraction complete, text length:", text.length);
+    
+    if (text.trim().length < 20) {
+      console.warn("⚠️ Extracted text is very short. This might be an image-based PDF.");
+    }
+    
     return text;
   } catch (err) {
-    console.error("PDF extraction error:", err);
+    console.error(" PDF extraction error:", err);
     throw new Error(`PDF extraction failed: ${err.message}`);
   }
 }
@@ -77,7 +76,7 @@ async function extractTextFromDOCX(file) {
     console.log("Mammoth.js available:", typeof mammoth !== 'undefined');
     
     if (typeof mammoth === 'undefined') {
-      throw new Error("Mammoth.js library failed to load. Please check your internet connection and refresh the page.");
+      throw new Error("Mammoth.js library is not loaded. Please refresh the page and try again.");
     }
     
     const reader = new FileReader();
@@ -92,15 +91,21 @@ async function extractTextFromDOCX(file) {
     let result;
     try {
       result = await mammoth.extractRawText({ arrayBuffer });
+      console.log("✅ DOCX extraction completed successfully");
     } catch (mammothError) {
-      console.error("Mammoth.js extraction error:", mammothError);
-      throw new Error(`Failed to extract text from Word document: ${mammothError.message}`);
+      console.error("❌ Mammoth.js extraction error:", mammothError);
+      throw new Error(`Failed to extract text from Word document. The file might be corrupted. Details: ${mammothError.message}`);
     }
     
     console.log("DOCX extraction complete, text length:", result.value.length);
+    
+    if (result.value.trim().length < 20) {
+      console.warn("⚠️ Extracted text is very short.");
+    }
+    
     return result.value;
   } catch (err) {
-    console.error("DOCX extraction error:", err);
+    console.error(" DOCX extraction error:", err);
     throw new Error(`DOCX extraction failed: ${err.message}`);
   }
 }

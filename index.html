@@ -6,8 +6,25 @@
 <title>AI Resume Analyzer</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script>
+// Wait for libraries to load before initializing
+window.addEventListener('load', function() {
+  if (typeof pdfjsLib !== 'undefined') {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    console.log('✅ PDF.js library loaded successfully');
+  } else {
+    console.error('❌ PDF.js library failed to load!');
+  }
+  
+  if (typeof mammoth !== 'undefined') {
+    console.log('✅ Mammoth.js library loaded successfully');
+  } else {
+    console.error('❌ Mammoth.js library failed to load!');
+  }
+});
+</script>
 
 <style>
 /* ===== BASE STYLES ===== */
