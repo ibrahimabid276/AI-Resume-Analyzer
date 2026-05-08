@@ -38,7 +38,7 @@ JOB DESCRIPTION:
 ${jobDesc}`;
 
     console.log('Sending request to OpenRouter API...');
-    console.log('Using model: openchat/openchat-7b:free');
+    console.log('Using model: openai/gpt-3.5-turbo');
 
     let response;
     try {
@@ -53,7 +53,7 @@ ${jobDesc}`;
             'X-Title': 'AI Resume Analyzer'
           },
           body: JSON.stringify({
-            model: 'openchat/openchat-7b:free',
+            model: 'openai/gpt-3.5-turbo',
             messages: [{
               role: 'user',
               content: prompt
