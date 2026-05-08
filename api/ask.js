@@ -20,8 +20,11 @@ export default async function handler(req, res) {
     }
 
     if (!process.env.OPENROUTER_API_KEY) {
+      console.error('❌ OPENROUTER_API_KEY not set in Vercel environment variables');
       return res.status(500).json({ error: 'API key not configured' });
     }
+    
+    console.log('✅ OPENROUTER_API_KEY found in environment');
 
     // Build context from resume, job, and analysis
     const context = `

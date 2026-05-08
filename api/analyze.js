@@ -20,9 +20,12 @@ export default async function handler(req, res) {
     }
 
     if (!process.env.OPENROUTER_API_KEY) {
-      console.error('OPENROUTER_API_KEY not set');
+      console.error('❌ OPENROUTER_API_KEY not set in Vercel environment variables');
+      console.error('📝 To fix: Go to Vercel Dashboard → Settings → Environment Variables → Add OPENROUTER_API_KEY');
       return res.status(500).json({ error: 'API key not configured' });
     }
+    
+    console.log('✅ OPENROUTER_API_KEY found in environment');
 
     const prompt = `You are an expert resume analyzer. Analyze this resume against the job description and return ONLY valid JSON (no markdown, no code blocks, no explanation):
 
