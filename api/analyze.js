@@ -38,7 +38,7 @@ JOB DESCRIPTION:
 ${jobDesc}`;
 
     console.log('Sending request to OpenRouter API...');
-    console.log('Using model: google/gemma-3-12b-it:free');
+    console.log('Using model: google/gemma-2-9b-it:free');
 
     let response;
     try {
@@ -53,7 +53,7 @@ ${jobDesc}`;
             'X-Title': 'AI Resume Analyzer'
           },
           body: JSON.stringify({
-            model: 'google/gemma-3-12b-it:free',
+            model: 'google/gemma-2-9b-it:free',
             messages: [{
               role: 'user',
               content: prompt
