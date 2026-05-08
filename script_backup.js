@@ -1,4 +1,4 @@
-// Configure PDF.js worker
+﻿// Configure PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
 // Global variables to store analysis context
@@ -8,7 +8,7 @@ let analysisContext = {
   result: null
 };
 
-// 📄 Extract text from PDF
+// ðŸ“„ Extract text from PDF
 async function extractTextFromPDF(file) {
   const reader = new FileReader();
 
@@ -40,7 +40,7 @@ async function extractTextFromPDF(file) {
   });
 }
 
-// 📄 Extract text from DOCX
+// ðŸ“„ Extract text from DOCX
 async function extractTextFromDOCX(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -62,7 +62,7 @@ async function extractTextFromDOCX(file) {
 }
 
 
-// 🚀 Main function
+// ðŸš€ Main function
 async function startAnalysis() {
 
   const file = document.getElementById("pdfFile").files[0];
@@ -72,7 +72,7 @@ async function startAnalysis() {
   console.log("File:", file);
   console.log("Job Description length:", jobDesc.length);
 
-  // ❌ Validation
+  // âŒ Validation
   if (!file) {
     alert("Please upload a resume file (PDF or DOCX)");
     return;
@@ -94,10 +94,10 @@ async function startAnalysis() {
   }
 
   try {
-    btn.innerText = "⏳ Reading your resume...";
+    btn.innerText = "â³ Reading your resume...";
     btn.disabled = true;
 
-    // 📄 Extract text based on file type
+    // ðŸ“„ Extract text based on file type
     let resumeText;
     if (isPDF) {
       resumeText = await extractTextFromPDF(file);
@@ -105,7 +105,7 @@ async function startAnalysis() {
       resumeText = await extractTextFromDOCX(file);
     }
 
-    console.log("RESUME TEXT:", resumeText); // 🧪 DEBUG
+    console.log("RESUME TEXT:", resumeText); // ðŸ§ª DEBUG
 
     if (!resumeText || resumeText.length < 20) {
       alert("File text extraction failed or empty");
@@ -116,12 +116,12 @@ async function startAnalysis() {
     analysisContext.resumeText = resumeText;
     analysisContext.jobDesc = jobDesc;
 
-    btn.innerText = "🤖 Analyzing with AI...";
+    btn.innerText = "ðŸ¤– Analyzing with AI...";
 
     console.log("Sending to Gemini API...");
 
-    // 🌐 Send to Gemini API directly
-    const API_KEY = 'YOUR_API_KEY_HERE';
+    // ðŸŒ Send to Gemini API directly
+    const API_KEY = 'AIzaSyBRQnQCJNVuAURCKdnDI0KfYZmZ5qhvKyQ';
     
     const prompt = `You are an expert resume analyzer. Analyze this resume against the job description and return ONLY valid JSON (no markdown, no code blocks, no explanation):
 
@@ -144,7 +144,7 @@ ${jobDesc}`;
           }],
           generationConfig: {
             temperature: 0.3,
-            maxOutputTokens: 2000
+            maxOutputTokens: 1000
           }
         })
       }
@@ -183,28 +183,14 @@ ${jobDesc}`;
     } catch (parseError) {
       console.error("JSON parse error:", parseError);
       console.error("Text that failed to parse:", cleanedText);
-      console.warn("JSON parse error, attempting to fix...");
-      try {
-        const lastBrace = cleanedText.lastIndexOf("}");
-        if (lastBrace > 0) {
-          cleanedText = cleanedText.substring(0, lastBrace + 1);
-          data = JSON.parse(cleanedText);
-          console.log("Successfully fixed and parsed JSON");
-        } else {
-          throw new Error("No complete JSON");
-        }
-      } catch (fixError) {
-        console.error("Failed to fix JSON:", fixError);
-        alert("AI response was incomplete. Please try again.");
-        return;
-      }
+      alert("Failed to parse AI response. Check console for details.");
       return;
     }
 
     // Store result for Q&A
     analysisContext.result = data;
 
-    // 🎯 Show results
+    // ðŸŽ¯ Show results
     showResults(data);
 
   } catch (err) {
@@ -217,7 +203,7 @@ ${jobDesc}`;
 }
 
 
-// 🎯 Show results in UI
+// ðŸŽ¯ Show results in UI
 function showResults(data) {
 
   // Switch UI with animation
@@ -226,7 +212,7 @@ function showResults(data) {
   resultsSection.classList.remove("hidden");
   resultsSection.classList.add("fade-in");
 
-  // 📊 Score with animated counter
+  // ðŸ“Š Score with animated counter
   const score = data.score || 50;
   animateScore(score);
 
@@ -236,7 +222,7 @@ function showResults(data) {
     circle.style.strokeDashoffset = offset;
   }, 100);
 
-  // 👤 Candidate Info
+  // ðŸ‘¤ Candidate Info
   document.getElementById("candidateInfo").innerHTML = `
     <p><b>Name:</b> ${data.name || "N/A"}</p>
     <p><b>Title:</b> ${data.title || "N/A"}</p>
@@ -244,20 +230,20 @@ function showResults(data) {
     <p><b>Education:</b> ${data.education || "N/A"}</p>
   `;
 
-  // 🟢 Matched skills
+  // ðŸŸ¢ Matched skills
   fillTags("matched", data.matched_skills, "green");
 
-  // 🔴 Missing skills
+  // ðŸ”´ Missing skills
   fillTags("missing", data.missing_skills, "red");
 
-  // 💪 Strengths
+  // ðŸ’ª Strengths
   fillList("strengths", data.strengths);
 
-  // 💡 Tips
+  // ðŸ’¡ Tips
   fillList("tips", data.tips);
 }
 
-// 🎯 Animate score counter
+// ðŸŽ¯ Animate score counter
 function animateScore(targetScore) {
   const scoreElement = document.getElementById("scoreText");
   let currentScore = 0;
@@ -273,7 +259,7 @@ function animateScore(targetScore) {
 }
 
 
-// 🟢🔴 Skill tags
+// ðŸŸ¢ðŸ”´ Skill tags
 function fillTags(id, items = [], color) {
   const container = document.getElementById(id);
   container.innerHTML = "";
@@ -292,7 +278,7 @@ function fillTags(id, items = [], color) {
 }
 
 
-// 📋 List (strengths / tips)
+// ðŸ“‹ List (strengths / tips)
 function fillList(id, items = []) {
   const container = document.getElementById(id);
   container.innerHTML = "";
@@ -304,7 +290,7 @@ function fillList(id, items = []) {
   });
 }
 
-// 💬 RAG Q&A Function
+// ðŸ’¬ RAG Q&A Function
 async function askQuestion() {
   const questionInput = document.getElementById('questionInput');
   const answerBox = document.getElementById('answerBox');
@@ -323,11 +309,11 @@ async function askQuestion() {
   }
   
   askBtn.disabled = true;
-  askBtn.innerText = '🤔 Thinking...';
+  askBtn.innerText = 'ðŸ¤” Thinking...';
   answerBox.innerHTML = '<span class="text-purple-400 typing-effect">Analyzing your question</span>';
   
   try {
-    const API_KEY = 'YOUR_API_KEY_HERE';
+    const API_KEY = 'AIzaSyBRQnQCJNVuAURCKdnDI0KfYZmZ5qhvKyQ';
     
     const prompt = `You are a resume analysis assistant. Based on the following resume and job description, answer this question concisely and helpfully.
 
@@ -389,7 +375,7 @@ ANSWER:`;
   }
 }
 
-// ✨ Typewriter effect
+// âœ¨ Typewriter effect
 function typewriterEffect(element, text, speed = 20) {
   return new Promise((resolve) => {
     let i = 0;
