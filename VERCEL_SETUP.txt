@@ -1,0 +1,53 @@
+==============================================
+HOW TO CONFIGURE OPENROUTER_API_KEY ON VERCEL
+==============================================
+
+PROBLEM: You're seeing "API Error: API key not configured"
+
+SOLUTION: Add your API key to Vercel's environment variables
+
+STEP-BY-STEP INSTRUCTIONS:
+==========================
+
+1. OPEN VERCEL DASHBOARD
+   - Go to: https://vercel.com/dashboard
+   - Click on your project: "ai-resume-analyzer"
+
+2. NAVIGATE TO ENVIRONMENT VARIABLES
+   - Click on "Settings" tab at the top
+   - Click on "Environment Variables" in the left sidebar
+
+3. ADD THE API KEY
+   - Click the "Add New" button
+   - Fill in these fields:
+   
+     Name: OPENROUTER_API_KEY
+     Value: [Copy from your .env file]
+     
+   - Check ALL environments:
+     ☑ Production
+     ☑ Preview  
+     ☑ Development
+   
+   - Click "Save"
+
+4. REDEPLOY YOUR APP
+   - Go to "Deployments" tab
+   - Click the "..." menu on latest deployment
+   - Click "Redeploy"
+   - Wait 1-2 minutes
+
+5. TEST YOUR APP
+   - Refresh browser (Ctrl + Shift + R)
+   - Upload a resume
+   - Should work now!
+
+YOUR API KEY LOCATION:
+======================
+Check your local .env file for the API key.
+Copy it and paste into Vercel environment variables.
+
+VERIFICATION:
+=============
+Open browser console (F12) after redeploy:
+✅ "OPENROUTER_API_KEY found in environment"
