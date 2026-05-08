@@ -61,7 +61,7 @@ Provide a helpful, specific answer based on the resume and job description conte
             'X-Title': 'AI Resume Analyzer'
           },
           body: JSON.stringify({
-            model: 'mistralai/mistral-7b-instruct:free',
+            model: 'openchat/openchat-7b:free',
             messages: [{
               role: 'user',
               content: prompt
